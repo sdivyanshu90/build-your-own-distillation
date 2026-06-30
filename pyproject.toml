@@ -1,0 +1,255 @@
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+# ---------------------------------------------------------------------------
+# Project metadata
+# ---------------------------------------------------------------------------
+[project]
+name = "distillery"
+description = "Distillery — a production-grade NLP model distillation platform (response-based KD, feature-based KD, and LLM-teacher data distillation)."
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.10"
+authors = [{ name = "Distillery Maintainers", email = "info@uniiq.ai" }]
+keywords = [
+  "knowledge-distillation",
+  "model-compression",
+  "transformers",
+  "nlp",
+  "mlops",
+  "pytorch",
+]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Typing :: Typed",
+]
+dynamic = ["version"]
+
+# Core runtime dependencies. These are required for the platform to operate.
+dependencies = [
+  "pydantic>=2.6,<3",
+  "pydantic-settings>=2.2,<3",
+  "structlog>=24.1",
+  "typing-extensions>=4.10",
+  "tenacity>=8.2",
+]
+
+[project.optional-dependencies]
+# Machine-learning runtime (the distillation engine).
+ml = [
+  "torch>=2.2",
+  "transformers>=4.40",
+  "datasets>=2.19",
+  "numpy>=1.26",
+  "scikit-learn>=1.4",
+]
+# REST API + async worker stack.
+api = [
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.29",
+  "gunicorn>=21.2",
+  "sqlalchemy>=2.0.29",
+  "alembic>=1.13",
+  "psycopg[binary]>=3.1",
+  "celery>=5.3",
+  "redis>=5.0",
+  "prometheus-client>=0.20",
+  "pyjwt>=2.8",
+  "python-multipart>=0.0.9",
+  "httpx>=0.27",
+  "slowapi>=0.1.9",
+  "email-validator>=2.1",
+]
+# LLM teacher integrations.
+llm = ["anthropic>=0.25", "httpx>=0.27"]
+# Object storage backends.
+storage = ["boto3>=1.34"]
+# CLI (typer>=0.15 required for click>=8.2 compatibility).
+cli = ["typer>=0.15", "rich>=13.7"]
+# Everything required to run the full platform.
+all = ["distillery[ml,api,llm,storage,cli]"]
+# Developer / test tooling.
+dev = [
+  "distillery[all]",
+  "pytest>=8.1",
+  "pytest-asyncio>=0.23",
+  "pytest-cov>=5.0",
+  "pytest-mock>=3.14",
+  "pytest-randomly>=3.15",
+  "coverage[toml]>=7.4",
+  "ruff>=0.4",
+  "black>=24.3",
+  "mypy>=1.9",
+  "pre-commit>=3.7",
+  "locust>=2.24",
+  "types-redis",
+  "types-requests",
+]
+docs = ["mkdocs>=1.6", "mkdocs-material>=9.5", "mkdocstrings[python]>=0.25"]
+
+[project.urls]
+Homepage = "https://github.com/uniiq-ai/distillery"
+Documentation = "https://github.com/uniiq-ai/distillery/tree/main/docs"
+Repository = "https://github.com/uniiq-ai/distillery"
+Changelog = "https://github.com/uniiq-ai/distillery/blob/main/CHANGELOG.md"
+Issues = "https://github.com/uniiq-ai/distillery/issues"
+
+[project.scripts]
+distillery = "distillery.cli.main:app"
+
+# ---------------------------------------------------------------------------
+# Hatch build configuration
+# ---------------------------------------------------------------------------
+[tool.hatch.version]
+path = "src/distillery/version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/distillery"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/distillery", "README.md", "LICENSE", "CHANGELOG.md"]
+
+# ---------------------------------------------------------------------------
+# Ruff (lint)
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+extend-exclude = ["migrations/versions"]
+
+[tool.ruff.lint]
+select = [
+  "E",   # pycodestyle errors
+  "W",   # pycodestyle warnings
+  "F",   # pyflakes
+  "I",   # isort
+  "N",   # pep8-naming
+  "UP",  # pyupgrade
+  "B",   # flake8-bugbear
+  "C4",  # flake8-comprehensions
+  "SIM", # flake8-simplify
+  "TID", # flake8-tidy-imports
+  "PL",  # pylint
+  "RUF", # ruff-specific
+  "S",   # flake8-bandit (security)
+  "ASYNC",
+]
+ignore = [
+  "PLR0913", # too many arguments — common in ML config-heavy constructors
+  "PLR0912", # too many branches — training/eval loops are inherently branchy
+  "PLR0915", # too many statements — training loops
+  "PLR2004", # magic value comparisons are acceptable in tests/metrics
+  "PLC0415", # lazy/local imports are intentional (keep torch/celery/boto3 lazy)
+  "RUF022",  # __all__ is grouped by layer with comments, not globally sorted
+  "S101",    # asserts are used in tests
+  "B008",    # FastAPI Depends() in defaults is the idiom
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S", "PLR2004", "PLR0915", "E501", "C408", "PLW2901"]
+"src/distillery/cli/**" = ["B008"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["distillery"]
+
+# ---------------------------------------------------------------------------
+# Black (format)
+# ---------------------------------------------------------------------------
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312"]
+
+# ---------------------------------------------------------------------------
+# mypy (static typing)
+# ---------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.10"
+plugins = ["pydantic.mypy"]
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+strict_equality = true
+warn_return_any = true
+ignore_missing_imports = true
+exclude = ["migrations/", "tests/"]
+
+[[tool.mypy.overrides]]
+module = [
+  "torch.*",
+  "transformers.*",
+  "datasets.*",
+  "sklearn.*",
+  "celery.*",
+  "redis.*",
+  "boto3.*",
+  "anthropic.*",
+]
+ignore_missing_imports = true
+
+# ---------------------------------------------------------------------------
+# pytest
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = [
+  "-ra",
+  "--strict-markers",
+  "--strict-config",
+  "--import-mode=importlib",
+]
+testpaths = ["tests"]
+pythonpath = ["src"]
+asyncio_mode = "auto"
+markers = [
+  "unit: fast, isolated unit tests (no I/O)",
+  "integration: tests that touch DB/redis/filesystem",
+  "e2e: end-to-end tests across the API and pipeline",
+  "slow: tests that download models or run long training loops",
+  "ml: tests requiring the torch/transformers stack",
+]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+# ---------------------------------------------------------------------------
+# Coverage
+# ---------------------------------------------------------------------------
+[tool.coverage.run]
+branch = true
+source = ["src/distillery"]
+omit = [
+  "src/distillery/__main__.py",
+  "*/migrations/*",
+  # Adapters that require live external systems — exercised by integration/CD,
+  # not unit tests (would otherwise need a real broker / AWS / Anthropic SDK).
+  "src/distillery/infrastructure/queue/celery_app.py",
+  "src/distillery/infrastructure/queue/tasks.py",
+  "src/distillery/infrastructure/storage/s3.py",
+  "src/distillery/teachers/llm/anthropic_client.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+precision = 2
+fail_under = 95
+exclude_lines = [
+  "pragma: no cover",
+  "if __name__ == .__main__.:",
+  "raise NotImplementedError",
+  "if TYPE_CHECKING:",
+  "@(abc\\.)?abstractmethod",
+  "\\.\\.\\.",
+]
