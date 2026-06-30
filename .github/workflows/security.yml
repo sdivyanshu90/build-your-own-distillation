@@ -61,19 +61,26 @@ jobs:
   image-scan:
     name: Image scan (Trivy)
     runs-on: ubuntu-latest
+    # Informational scan: findings are uploaded to the Security tab but never
+    # fail the workflow (vulnerabilities are triaged there, not in CI), and a
+    # transient Trivy DB download issue won't break the build.
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - name: Build image
         run: docker build -f deploy/docker/Dockerfile -t distillery:scan .
       - name: Trivy scan
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@v0.28.0
         with:
           image-ref: distillery:scan
+          scan-type: image
           format: sarif
           output: trivy.sarif
           severity: CRITICAL,HIGH
           ignore-unfixed: true
+          exit-code: "0"
       - name: Upload SARIF
+        if: always() && hashFiles('trivy.sarif') != ''
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy.sarif
