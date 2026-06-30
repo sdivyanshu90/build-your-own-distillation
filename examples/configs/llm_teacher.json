@@ -1,0 +1,32 @@
+{
+  "strategy": "llm_teacher",
+  "teacher_type": "llm",
+  "device": "cpu",
+  "student": {
+    "name_or_path": "demo-student",
+    "num_labels": 2,
+    "max_seq_length": 32,
+    "config_only": true
+  },
+  "dataset": {
+    "format": "inline",
+    "label_names": ["negative", "positive"],
+    "inline_rows": [
+      {"text": "seed example to satisfy the dataset spec", "label": 0}
+    ]
+  },
+  "training": {
+    "epochs": 3,
+    "train_batch_size": 8,
+    "learning_rate": 0.001,
+    "warmup_ratio": 0.0
+  },
+  "llm": {
+    "model": "claude-sonnet-4-6",
+    "task_description": "Classify the sentiment of short movie reviews as negative or positive.",
+    "label_names": ["negative", "positive"],
+    "num_samples": 40,
+    "temperature": 0.7,
+    "label_existing": false
+  }
+}
