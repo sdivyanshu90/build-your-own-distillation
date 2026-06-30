@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: distillery
+
+commonLabels:
+  app.kubernetes.io/name: distillery
+  app.kubernetes.io/part-of: distillery
+
+resources:
+  - namespace.yaml
+  - serviceaccount.yaml
+  - configmap.yaml
+  - secret.example.yaml
+  - deployment-api.yaml
+  - deployment-worker.yaml
+  - service.yaml
+  - ingress.yaml
+  - hpa-api.yaml
+  - pdb.yaml
+  - migration-job.yaml
+
+images:
+  - name: ghcr.io/uniiq-ai/distillery
+    newTag: latest
