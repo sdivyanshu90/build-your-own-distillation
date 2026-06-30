@@ -6,17 +6,17 @@ import pytest
 
 torch = pytest.importorskip("torch")
 
-from distillery.core.models import build_tiny_classifier  # noqa: E402
-from distillery.core.strategies.feature_based import (  # noqa: E402
+from distillery.core.models import build_tiny_classifier
+from distillery.core.strategies.feature_based import (
     FeatureBasedStrategy,
     default_layer_map,
 )
-from distillery.core.strategies.llm_teacher import SupervisedStrategy  # noqa: E402
-from distillery.core.strategies.registry import build_strategy, register_strategy  # noqa: E402
-from distillery.core.strategies.response_based import ResponseBasedStrategy  # noqa: E402
-from distillery.domain.enums import DistillationStrategy  # noqa: E402
-from distillery.domain.exceptions import TrainingError  # noqa: E402
-from distillery.domain.value_objects import KDHyperParams  # noqa: E402
+from distillery.core.strategies.llm_teacher import SupervisedStrategy
+from distillery.core.strategies.registry import build_strategy, register_strategy
+from distillery.core.strategies.response_based import ResponseBasedStrategy
+from distillery.domain.enums import DistillationStrategy
+from distillery.domain.exceptions import TrainingError
+from distillery.domain.value_objects import KDHyperParams
 
 pytestmark = [pytest.mark.unit, pytest.mark.ml]
 

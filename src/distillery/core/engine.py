@@ -49,7 +49,7 @@ LLMDatasetBuilder = Callable[[LLMTeacherConfig, DatasetSpec], tuple[list[dict], 
 
 def _peak_memory_mb(device: torch.device) -> float:
     if device.type == "cuda":  # pragma: no cover - requires a GPU
-        return round(torch.cuda.max_memory_allocated() / 1e6, 2)
+        return round(float(torch.cuda.max_memory_allocated()) / 1e6, 2)
     try:
         import resource
 

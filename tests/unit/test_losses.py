@@ -6,7 +6,7 @@ import pytest
 
 torch = pytest.importorskip("torch")
 
-from distillery.core.losses import (  # noqa: E402
+from distillery.core.losses import (
     FeatureDistillationLoss,
     ResponseDistillationLoss,
     soft_target_kl,

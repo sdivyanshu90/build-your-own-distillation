@@ -25,7 +25,8 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
-      - run: pip install ruff==0.4.4 black==24.4.2
+      # Keep these pinned in lockstep with the [dev] extra in pyproject.toml.
+      - run: pip install ruff==0.12.2 black==26.5.0
       - name: Ruff
         run: ruff check src tests
       - name: Black

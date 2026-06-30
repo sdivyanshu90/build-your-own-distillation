@@ -8,23 +8,23 @@ import pytest
 
 torch = pytest.importorskip("torch")
 
-from distillery.core.data import (  # noqa: E402
+from distillery.core.data import (
     TokenizedDataset,
     _resolve_labels,
     build_datasets,
     load_texts,
     make_dataloader,
 )
-from distillery.core.models import (  # noqa: E402
+from distillery.core.models import (
     HashingTokenizer,
     build_model,
     build_tiny_classifier,
     count_parameters,
     resolve_device,
 )
-from distillery.domain.enums import DatasetFormat  # noqa: E402
-from distillery.domain.exceptions import ValidationError  # noqa: E402
-from distillery.domain.value_objects import DatasetSpec, ModelSpec  # noqa: E402
+from distillery.domain.enums import DatasetFormat
+from distillery.domain.exceptions import ValidationError
+from distillery.domain.value_objects import DatasetSpec, ModelSpec
 
 pytestmark = [pytest.mark.unit, pytest.mark.ml]
 

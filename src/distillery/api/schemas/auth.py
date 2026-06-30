@@ -17,7 +17,9 @@ class LoginRequest(BaseModel):
 
 class TokenResponse(BaseModel):
     access_token: str
-    token_type: str = "bearer"  # noqa: S105 - not a secret; the OAuth2 token type
+    # Use Field(default=...) rather than a bare string so linters don't mistake
+    # the OAuth2 token type for a hardcoded secret (Bandit/ruff S105).
+    token_type: str = Field(default="bearer")
     expires_in: int
 
 

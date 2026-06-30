@@ -105,12 +105,20 @@ def build_rate_limiter() -> RateLimiter:
     limit = settings.security.rate_limit_per_minute
     broker = settings.queue.broker_url
     if broker.startswith("redis"):
-        try:  # pragma: no cover - exercised only with a live Redis
+        try:
+            import redis
+
             from distillery.infrastructure.security.rate_limit import RedisRateLimiter
 
-            return RedisRateLimiter.from_url(broker, limit)
-        except Exception:
-            logger.warning("Redis rate limiter unavailable; using in-memory limiter")
+            # Verify connectivity NOW and fall back to in-memory if Redis is
+            # unreachable. Otherwise a client that cannot connect would only fail
+            # later, per-request, inside the rate-limit middleware (turning every
+            # request into a 500 — exactly what broke CI where Redis is absent).
+            client = redis.Redis.from_url(broker, socket_connect_timeout=1)
+            client.ping()
+            return RedisRateLimiter(client, limit)  # pragma: no cover - needs live Redis
+        except Exception as exc:
+            logger.warning("Redis rate limiter unavailable (%s); using in-memory limiter", exc)
     return InMemoryRateLimiter(limit)
 
 

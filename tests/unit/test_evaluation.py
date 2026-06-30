@@ -6,16 +6,16 @@ import pytest
 
 torch = pytest.importorskip("torch")
 
-from distillery.core.data import build_datasets, make_dataloader  # noqa: E402
-from distillery.core.evaluation import (  # noqa: E402
+from distillery.core.data import build_datasets, make_dataloader
+from distillery.core.evaluation import (
     compute_classification_metrics,
     evaluate,
     measure_latency_ms,
     student_accuracy,
 )
-from distillery.core.models import build_tiny_classifier  # noqa: E402
-from distillery.domain.enums import DatasetFormat  # noqa: E402
-from distillery.domain.value_objects import DatasetSpec  # noqa: E402
+from distillery.core.models import build_tiny_classifier
+from distillery.domain.enums import DatasetFormat
+from distillery.domain.value_objects import DatasetSpec
 
 pytestmark = [pytest.mark.unit, pytest.mark.ml]
 DEVICE = torch.device("cpu")
