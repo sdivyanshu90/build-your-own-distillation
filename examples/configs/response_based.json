@@ -1,0 +1,41 @@
+{
+  "strategy": "response_based",
+  "teacher_type": "huggingface",
+  "device": "cpu",
+  "teacher": {
+    "name_or_path": "demo-teacher",
+    "num_labels": 2,
+    "max_seq_length": 32,
+    "config_only": true
+  },
+  "student": {
+    "name_or_path": "demo-student",
+    "num_labels": 2,
+    "max_seq_length": 32,
+    "config_only": true
+  },
+  "dataset": {
+    "format": "inline",
+    "label_names": ["negative", "positive"],
+    "inline_rows": [
+      {"text": "an absolutely wonderful, delightful film", "label": 1},
+      {"text": "a brilliant and moving masterpiece", "label": 1},
+      {"text": "loved every minute, fantastic acting", "label": 1},
+      {"text": "a heartwarming and joyful experience", "label": 1},
+      {"text": "an awful, boring and terrible movie", "label": 0},
+      {"text": "a dull, lifeless and painful watch", "label": 0},
+      {"text": "hated it, a complete waste of time", "label": 0},
+      {"text": "disappointing, clumsy and forgettable", "label": 0}
+    ]
+  },
+  "training": {
+    "epochs": 2,
+    "train_batch_size": 4,
+    "learning_rate": 0.001,
+    "warmup_ratio": 0.0
+  },
+  "kd": {
+    "temperature": 2.0,
+    "alpha": 0.5
+  }
+}
