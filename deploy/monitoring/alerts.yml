@@ -1,0 +1,46 @@
+# Prometheus alerting rules for Distillery.
+groups:
+  - name: distillery-api
+    rules:
+      - alert: DistilleryApiDown
+        expr: up{job="distillery-api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Distillery API target is down"
+          description: "No successful scrape of the API for 2 minutes."
+
+      - alert: DistilleryHighErrorRate
+        expr: |
+          sum(rate(distillery_http_requests_total{status=~"5.."}[5m]))
+            / clamp_min(sum(rate(distillery_http_requests_total[5m])), 1) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Elevated 5xx error rate (>5%)"
+          description: "More than 5% of HTTP responses are 5xx over the last 5 minutes."
+
+      - alert: DistilleryHighLatencyP95
+        expr: |
+          histogram_quantile(
+            0.95, sum(rate(distillery_http_request_duration_seconds_bucket[5m])) by (le)
+          ) > 1.5
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API p95 latency above 1.5s"
+          description: "The 95th percentile request latency has exceeded 1.5s for 10 minutes."
+
+  - name: distillery-jobs
+    rules:
+      - alert: DistilleryJobFailureSpike
+        expr: increase(distillery_jobs_finished_total{status="failed"}[15m]) > 5
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Spike in failed distillation jobs"
+          description: "More than 5 jobs failed in the last 15 minutes."
