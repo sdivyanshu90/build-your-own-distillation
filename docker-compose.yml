@@ -1,0 +1,119 @@
+# =============================================================================
+# Distillery — full local stack: Postgres, Redis, API, worker, migrations,
+# Prometheus and Grafana. Bring up with `make up` (or `docker compose up -d`).
+# =============================================================================
+name: distillery
+
+x-app-env: &app-env
+  DISTILLERY_ENV: development
+  DISTILLERY_DEBUG: "true"
+  DISTILLERY_LOG_FORMAT: json
+  DISTILLERY_DATABASE__URL: postgresql+psycopg://distillery:distillery@postgres:5432/distillery
+  DISTILLERY_QUEUE__BROKER_URL: redis://redis:6379/0
+  DISTILLERY_QUEUE__RESULT_BACKEND: redis://redis:6379/1
+  DISTILLERY_STORAGE__BACKEND: local
+  DISTILLERY_STORAGE__LOCAL_ROOT: /app/artifacts
+  DISTILLERY_SECURITY__JWT_SECRET: ${DISTILLERY_SECURITY__JWT_SECRET:-local-dev-secret-change-me-0123456789abcdef}
+  DISTILLERY_SECURITY__BOOTSTRAP_API_KEYS: ${DISTILLERY_BOOTSTRAP_API_KEYS:-dev-local-admin-key}
+  DISTILLERY_LLM__ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: distillery
+      POSTGRES_PASSWORD: distillery
+      POSTGRES_DB: distillery
+    ports: ["5432:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U distillery"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports: ["6379:6379"]
+    volumes: ["redisdata:/data"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  migrate:
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile
+    command: ["migrate"]
+    environment: *app-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile
+    command: ["api"]
+    environment:
+      <<: *app-env
+      WEB_CONCURRENCY: "2"
+    ports: ["8000:8000"]
+    volumes: ["artifacts:/app/artifacts"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile
+    command: ["worker"]
+    environment:
+      <<: *app-env
+      DISTILLERY_QUEUE__WORKER_CONCURRENCY: "2"
+    volumes: ["artifacts:/app/artifacts"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./deploy/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./deploy/monitoring/alerts.yml:/etc/prometheus/alerts.yml:ro
+    ports: ["9090:9090"]
+    depends_on: [api]
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+    volumes:
+      - ./deploy/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    ports: ["3000:3000"]
+    depends_on: [prometheus]
+
+volumes:
+  pgdata:
+  redisdata:
+  artifacts:
