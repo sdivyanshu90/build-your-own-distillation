@@ -7,7 +7,7 @@
 # =============================================================================
 
 # ---- Builder ----------------------------------------------------------------
-FROM python:3.11-slim AS builder
+FROM python:3.14-slim AS builder
 
 ENV PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
@@ -31,7 +31,7 @@ RUN pip install --upgrade pip wheel \
     && pip install ".[all]"
 
 # ---- Runtime ----------------------------------------------------------------
-FROM python:3.11-slim AS runtime
+FROM python:3.14-slim AS runtime
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
