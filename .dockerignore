@@ -1,0 +1,49 @@
+# Version control
+.git/
+.gitignore
+
+# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local artifacts & data (never bake into images)
+artifacts/
+checkpoints/
+runs/
+data/
+*.pt
+*.bin
+*.safetensors
+.cache/
+.hf_cache/
+
+# Secrets / local config
+.env
+.env.*
+!.env.example
+secrets/
+
+# Docs & dev meta (not needed at runtime)
+docs/
+site/
+tests/
+examples/
+*.md
+!README.md
+
+# CI / editor
+.github/
+.idea/
+.vscode/
+.DS_Store
