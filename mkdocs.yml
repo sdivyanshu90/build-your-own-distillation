@@ -1,0 +1,58 @@
+site_name: Distillery
+site_description: A production-grade NLP model distillation platform.
+repo_url: https://github.com/uniiq-ai/distillery
+repo_name: uniiq-ai/distillery
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - search.suggest
+  palette:
+    - scheme: default
+      primary: indigo
+      toggle: { icon: material/brightness-7, name: Switch to dark mode }
+    - scheme: slate
+      primary: indigo
+      toggle: { icon: material/brightness-4, name: Switch to light mode }
+
+markdown_extensions:
+  - admonition
+  - toc: { permalink: true }
+  - pymdownx.highlight
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+
+nav:
+  - Home: index.md
+  - Architecture:
+      - Overview: architecture/overview.md
+      - Folder structure: architecture/folder-structure.md
+      - Sequence diagrams: architecture/sequence-diagrams.md
+      - Data flow: architecture/data-flow.md
+      - Deployment: architecture/deployment.md
+  - API reference: api/reference.md
+  - Database: database.md
+  - Security: security.md
+  - Guides:
+      - User guide: guides/user-guide.md
+      - Developer guide: guides/developer-guide.md
+      - Administrator guide: guides/administrator-guide.md
+      - Deployment guide: guides/deployment-guide.md
+      - Troubleshooting: guides/troubleshooting.md
+  - Operations:
+      - Runbook: operations/runbook.md
+  - Decisions (ADRs): decisions/README.md
