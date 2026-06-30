@@ -69,16 +69,24 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build image
         run: docker build -f deploy/docker/Dockerfile -t distillery:scan .
+      # Use the Trivy CLI directly instead of aquasecurity/trivy-action: that
+      # action's tags transitively pin aquasecurity/setup-trivy@v0.2.1, which was
+      # removed upstream and breaks action resolution. The official install
+      # script + CLI has no such dependency chain.
+      - name: Install Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
+            | sh -s -- -b /usr/local/bin
       - name: Trivy scan
-        uses: aquasecurity/trivy-action@v0.28.0
-        with:
-          image-ref: distillery:scan
-          scan-type: image
-          format: sarif
-          output: trivy.sarif
-          severity: CRITICAL,HIGH
-          ignore-unfixed: true
-          exit-code: "0"
+        run: |
+          trivy image \
+            --scanners vuln \
+            --severity CRITICAL,HIGH \
+            --ignore-unfixed \
+            --format sarif \
+            --output trivy.sarif \
+            --exit-code 0 \
+            distillery:scan
       - name: Upload SARIF
         if: always() && hashFiles('trivy.sarif') != ''
         uses: github/codeql-action/upload-sarif@v3
