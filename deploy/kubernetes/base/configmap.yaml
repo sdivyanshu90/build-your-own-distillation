@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: distillery-config
+  labels:
+    app.kubernetes.io/name: distillery
+data:
+  # Non-secret configuration. Secrets (DB URL, JWT, API keys) live in the Secret.
+  DISTILLERY_ENV: "production"
+  DISTILLERY_DEBUG: "false"
+  DISTILLERY_LOG_LEVEL: "INFO"
+  DISTILLERY_LOG_FORMAT: "json"
+  DISTILLERY_API__HOST: "0.0.0.0"
+  DISTILLERY_API__PORT: "8000"
+  DISTILLERY_API__DOCS_ENABLED: "false"
+  DISTILLERY_QUEUE__BROKER_URL: "redis://redis-master.distillery.svc.cluster.local:6379/0"
+  DISTILLERY_QUEUE__RESULT_BACKEND: "redis://redis-master.distillery.svc.cluster.local:6379/1"
+  DISTILLERY_QUEUE__WORKER_CONCURRENCY: "2"
+  DISTILLERY_STORAGE__BACKEND: "s3"
+  DISTILLERY_STORAGE__S3_BUCKET: "distillery-artifacts"
+  DISTILLERY_STORAGE__S3_REGION: "us-east-1"
+  DISTILLERY_OBSERVABILITY__METRICS_ENABLED: "true"
+  WEB_CONCURRENCY: "4"
