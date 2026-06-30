@@ -1,0 +1,39 @@
+name: Bug report
+description: Report a defect in Distillery
+labels: [bug, triage]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps, config, or API calls that reproduce the issue.
+      placeholder: |
+        1. POST /api/v1/jobs with ...
+        2. ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Distillery version
+      placeholder: "1.0.0"
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Python version, deployment mode (Docker/K8s/local), GPU/CPU.
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Paste structured logs (redact secrets). Include the request_id if available.
+      render: shell
