@@ -1,0 +1,58 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "schemaVersion": 39,
+  "title": "Distillery Overview",
+  "tags": ["distillery"],
+  "time": { "from": "now-6h", "to": "now" },
+  "timezone": "utc",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "HTTP request rate (by status)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum by (status) (rate(distillery_http_requests_total[5m]))",
+          "legendFormat": "{{status}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP p95 latency (s)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(distillery_http_request_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Jobs in progress",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 8 },
+      "targets": [{ "expr": "distillery_jobs_in_progress" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Jobs finished (by status)",
+      "gridPos": { "h": 6, "w": 9, "x": 6, "y": 8 },
+      "targets": [
+        {
+          "expr": "sum by (status) (increase(distillery_jobs_finished_total[15m]))",
+          "legendFormat": "{{status}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "LLM teacher tokens (rate)",
+      "gridPos": { "h": 6, "w": 9, "x": 15, "y": 8 },
+      "targets": [
+        { "expr": "rate(distillery_llm_teacher_tokens_total[5m])", "legendFormat": "tokens/s" }
+      ]
+    }
+  ]
+}
