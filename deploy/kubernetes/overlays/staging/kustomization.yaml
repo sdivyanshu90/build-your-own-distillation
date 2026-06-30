@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+images:
+  - name: ghcr.io/uniiq-ai/distillery
+    newTag: "staging"
+
+replicas:
+  - name: distillery-api
+    count: 2
+  - name: distillery-worker
+    count: 1
+
+patches:
+  # Staging runs with the env flag set and API docs enabled.
+  - patch: |-
+      - op: replace
+        path: /data/DISTILLERY_ENV
+        value: staging
+      - op: replace
+        path: /data/DISTILLERY_API__DOCS_ENABLED
+        value: "true"
+    target:
+      kind: ConfigMap
+      name: distillery-config
